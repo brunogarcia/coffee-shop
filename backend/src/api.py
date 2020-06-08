@@ -36,7 +36,7 @@ db_drop_and_create_all()
 @app.route('/drinks', methods=['GET'])
 def retrieve_drinks():
     '''
-    GET /drinks
+    Retrieve drinks
         it should be a public endpoint
         it should contain only the drink.short() data representation
     returns
@@ -58,15 +58,30 @@ def retrieve_drinks():
         abort(422)
 
 
-'''
-@TODO implement endpoint
-    GET /drinks-detail
-        it should require the 'get:drinks-detail' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
-        or appropriate status code indicating reason for failure
-'''
+@app.route('/drinks-detail', methods=['GET'])
+@requires_auth('get:drinks-detail')
+def retrieve_drinks_detail(payload):
+    '''
+        Retrieve drinks detail
+            it should require the 'get:drinks-detail' permission
+            it should contain the drink.long() data representation
+        returns
+            status code 200
+            json {"success": True, "drinks": drinks} where drinks is the list of drinks
+            or appropriate status code indicating reason for failure
+    '''
+    try:
+        drinks = Drink.query.order_by(Drink.id).all()
+        drinks_formatted = [
+            drink.long() for drink in drinks
+        ]
 
+        return jsonify({
+            'success': True,
+            'drinks': drinks_formatted,
+        })
+    except Exception:
+        abort(422)
 
 '''
 @TODO implement endpoint
