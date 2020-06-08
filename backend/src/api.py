@@ -67,7 +67,8 @@ def retrieve_drinks_detail(payload):
             it should contain the drink.long() data representation
         returns
             status code 200
-            json {"success": True, "drinks": drinks} where drinks is the list of drinks
+            json {"success": True, "drinks": drinks}
+                where drinks is the list of drinks
             or appropriate status code indicating reason for failure
     '''
     try:
@@ -83,16 +84,41 @@ def retrieve_drinks_detail(payload):
     except Exception:
         abort(422)
 
-'''
-@TODO implement endpoint
-    POST /drinks
-        it should create a new row in the drinks table
-        it should require the 'post:drinks' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
-        or appropriate status code indicating reason for failure
-'''
+@app.route('/drinks', methods=['POST'])
+@requires_auth('post:drinks')
+def create_drink(payload):
+    '''
+        Create a new drink
+            it should create a new row in the drinks table
+            it should require the 'post:drinks' permission
+            it should contain the drink.long() data representation
+        returns
+            status code 200
+            json {"success": True, "drinks": drink}
+                where drink is an array containing only the newly created drink
+            or appropriate status code indicating reason for failure
+    '''
+    # Get raw data
+    body = request.get_json()
+    recipe = body.get('recipe', None)
+    title = body.get('title', None)
 
+    try:
+        # Create drink
+        drink = Drink(
+            title=title,
+            recipe=json.dumps(recipe),
+        )
+
+        # Update db
+        drink.insert()
+
+        return jsonify({
+            'success': True,
+            'drinks': [drink.long()],
+        })
+    except Exception:
+        abort(422)
 
 '''
 @TODO implement endpoint
