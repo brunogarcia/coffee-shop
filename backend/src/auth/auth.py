@@ -195,7 +195,9 @@ def requires_auth(permission=''):
                 abort(401)
 
             check_permissions(permission, payload)
-            return function_to_decorate(payload, *args, **kwargs)
 
+            if kwargs.get('drink_id'):
+                return function_to_decorate(kwargs.get('drink_id'))
+            return function_to_decorate(payload, *args, **kwargs)
         return wrapper
     return requires_auth_decorator
